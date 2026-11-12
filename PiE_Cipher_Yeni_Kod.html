@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TÜBİTAK 2204-B - Pi & e İrrasyonel Şifreleme Laboratuvarı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#090d16',
+                            card: '#111827',
+                            border: '#1f2937',
+                            primary: '#06b6d4',
+                            secondary: '#a855f7',
+                            accent: '#10b981'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #060911;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.08) 0%, transparent 40%);
+        }
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .digit-box {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .digit-box:hover {
+            transform: scale(1.15);
+            z-index: 20;
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.4);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px -3px rgba(168, 85, 247, 0.4);
+        }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-black">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-slate-800/80 glass-panel sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg glow-cyan">
+                    &pi;
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-extrabold text-lg text-white tracking-wide">TÜBİTAK 2204-B</h1>
+                        <span class="text-[10px] uppercase font-mono tracking-widest px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">Ortaokul Projesi</span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-mono">Aşkın & İrrasyonel Sayılar Kriptografisi (&pi; & e)</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex space-x-1 sm:space-x-2 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
+                <button onclick="switchTab('encrypt')" id="tab-encrypt" class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 bg-cyan-500 text-slate-950 font-semibold shadow-md">
+                    Şifrele
+                </button>
+                <button onclick="switchTab('decrypt')" id="tab-decrypt" class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-400 hover:text-white transition-all duration-200">
+                    Şifre Çöz
+                </button>
+                <button onclick="switchTab('visualizer')" id="tab-visualizer" class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-400 hover:text-white transition-all duration-200">
+                    Görselleştirici
+                </button>
+                <button onclick="switchTab('about')" id="tab-about" class="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-400 hover:text-white transition-all duration-200">
+                    Teori & Proje
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+
+        <!-- ==================== SECTION 1: ŞİFRELEME ==================== -->
+        <section id="sec-encrypt" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Sol Panel: Giriş Formu -->
+                <div class="lg:col-span-6 glass-panel rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></span>
+                            Metin Şifreleme Paneli
+                        </h2>
+                        <span class="text-xs font-mono text-slate-400">Harf Harf Mod</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Şifrelenecek Mesaj</label>
+                            <textarea id="enc-input" rows="4" class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono placeholder:text-slate-600 transition" placeholder="Şifrelemek istediğiniz metni buraya yazın... (Örn: Tubitak)"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-mono uppercase text-slate-400 mb-2">İrrasyonel Sabit</label>
+                                <select id="enc-constant" class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono">
+                                    <option value="pi">&pi; (Pi Sayısı)</option>
+                                    <option value="e">e (Euler Sayısı)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-xs font-mono uppercase text-slate-400">Gizli Anahtar / Kaydırma Değeri</label>
+                                    <button type="button" onclick="generateRandomSalt()" class="text-[10px] font-mono text-cyan-400 hover:text-cyan-300 transition flex items-center gap-1 bg-cyan-500/10 px-2 py-0.5 rounded-md border border-cyan-500/30">
+                                        🎲 Rastgele Üret
+                                    </button>
+                                </div>
+                                <input type="number" id="enc-salt" value="42" min="0" class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="Örn: 100">
+                            </div>
+                        </div>
+
+                        <!-- Output Mode Switcher -->
+                        <div>
+                            <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Çıktı Formatı</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <button type="button" onclick="setOutputMode('open')" id="btn-mode-open" class="py-2.5 px-4 rounded-xl border border-cyan-500 bg-cyan-500/10 text-cyan-400 font-mono text-xs font-semibold transition flex items-center justify-center gap-2">
+                                    <span>🔓 Açık Pi/e Modu</span>
+                                </button>
+                                <button type="button" onclick="setOutputMode('masked')" id="btn-mode-masked" class="py-2.5 px-4 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 font-mono text-xs font-semibold transition flex items-center justify-center gap-2 hover:border-slate-700">
+                                    <span>🔒 Gizli Token Modu</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button onclick="executeEncrypt()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 text-slate-950 font-bold hover:opacity-95 transition shadow-lg glow-cyan flex items-center justify-center gap-2">
+                            <span>🚀 Mesajı Şifrele</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sağ Panel: Sonuçlar -->
+                <div class="lg:col-span-6 glass-panel rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+                                Şifreli Çıktı & Token
+                            </h3>
+                            <span id="stat-status" class="text-xs font-mono px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Bekliyor</span>
+                        </div>
+
+                        <div class="relative bg-slate-950/90 border border-slate-800/80 rounded-2xl p-5 min-h-[140px] flex items-center justify-center font-mono text-sm">
+                            <span id="enc-placeholder" class="text-slate-600 text-center">Seçilen moda göre şifrelenmiş veri burada görüntülenecek...</span>
+                            <div id="enc-output-text" class="hidden text-cyan-400 break-all select-all w-full text-left leading-relaxed"></div>
+                        </div>
+                    </div>
+
+                    <!-- İstatistik Bilgileri -->
+                    <div class="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800">
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                            <div class="text-[10px] font-mono text-slate-500 uppercase">Karakter</div>
+                            <div id="stat-chars" class="text-base font-bold text-white font-mono mt-0.5">0</div>
+                        </div>
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                            <div class="text-[10px] font-mono text-slate-500 uppercase">Sabit</div>
+                            <div id="stat-const" class="text-base font-bold text-cyan-400 font-mono mt-0.5">-</div>
+                        </div>
+                        <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-center">
+                            <button onclick="copyEncryptedOutput()" class="w-full h-full text-xs font-mono text-purple-400 hover:text-purple-300 font-bold flex flex-col items-center justify-center">
+                                <span>📋 Kopyala</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SECTION 2: ŞİFRE ÇÖZ ==================== -->
+        <section id="sec-decrypt" class="space-y-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Şifre Çözme Girdisi -->
+                <div class="lg:col-span-5 glass-panel rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-purple-400 animate-pulse"></span>
+                            Şifre Çözme Paneli
+                        </h2>
+                        <span id="dec-status-badge" class="text-xs font-mono px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Bekliyor</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Şifreli Token / Veri</label>
+                            <textarea id="dec-input" rows="4" class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 font-mono placeholder:text-slate-600 transition" placeholder="PIOPEN-... veya PIENCRYPT$..."></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-mono uppercase text-slate-400 mb-2">Gizli Anahtar / Kaydırma Değeri</label>
+                            <input type="number" id="dec-salt" value="42" min="0" class="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-purple-500 font-mono" placeholder="Şifrelemede kullanılan salt değeri">
+                        </div>
+
+                        <button onclick="executeDecrypt()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold hover:opacity-95 transition shadow-lg glow-purple flex items-center justify-center gap-2">
+                            <span>🔍 Şifreyi Çöz & Doğrula</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Şifre Çözme Sonucu & Tablo -->
+                <div class="lg:col-span-7 glass-panel rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                            <h3 class="text-lg font-bold text-white">Çözülen Orijinal Mesaj</h3>
+                            <span class="text-xs font-mono text-slate-400">Doğrulama Çözümlemesi</span>
+                        </div>
+
+                        <div class="bg-slate-950/90 border border-slate-800/80 rounded-2xl p-5 min-h-[90px] flex items-center justify-center font-mono text-lg text-emerald-400">
+                            <span id="dec-placeholder" class="text-slate-600 text-sm">Şifre çözüldüğünde mesaj burada görünecek...</span>
+                            <span id="dec-result-text" class="hidden font-bold tracking-wider"></span>
+                        </div>
+                    </div>
+
+                    <!-- Matematiksel Basamak Çözümleme Tablosu -->
+                    <div class="space-y-3">
+                        <div class="text-xs font-mono uppercase text-slate-400">Pi/e Basamak Çözümleme Tablosu</div>
+                        <div class="bg-slate-950/80 border border-slate-800/80 rounded-2xl overflow-hidden max-h-56 overflow-y-auto">
+                            <table class="w-full text-left text-xs font-mono">
+                                <thead class="bg-slate-900/90 text-slate-400 border-b border-slate-800 sticky top-0">
+                                    <tr>
+                                        <th class="p-2">Harf</th>
+                                        <th class="p-2">Sabit</th>
+                                        <th class="p-2">Indeks</th>
+                                        <th class="p-2">3'lü Sayı</th>
+                                        <th class="p-2">Açıklama</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dec-table-body" class="divide-y divide-slate-800/50 text-slate-300">
+                                    <tr>
+                                        <td colspan="5" class="p-4 text-center text-slate-600">Henüz şifre çözülmedi.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SECTION 3: GÖRSELLEŞTİRİCİ ==================== -->
+        <section id="sec-visualizer" class="space-y-6 hidden">
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+                            &pi; ve e Sabitleri Basamak Görselleştiricisi
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">İrrasyonel sayıların virgülden sonraki basamaklarını inceleyin ve arama yapın.</p>
+                    </div>
+
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <select id="vis-constant" onchange="renderVisualizer()" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-cyan-500">
+                            <option value="pi">&pi; Sayısı Basamakları</option>
+                            <option value="e">e Sayısı Basamakları</option>
+                        </select>
+                        <input type="text" id="vis-search" oninput="highlightVisualizerDigits()" placeholder="3'lü sayı ara (örn: 084)" class="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-sm font-mono text-white focus:outline-none focus:border-cyan-500 placeholder:text-slate-600 w-44">
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/90 border border-slate-800/80 rounded-2xl p-6 font-mono text-sm max-h-96 overflow-y-auto leading-loose" id="vis-grid">
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SECTION 4: TEORI & PROJE ==================== -->
+        <section id="sec-about" class="space-y-6 hidden">
+            <div class="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+                <div class="border-b border-slate-800 pb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+                        TÜBİTAK 2204-B Proje Sunum & Savunma Rehberi
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-1">Projenizin bilimsel altyapısını jüriye sunarken kullanabileceğiniz ana hatlar.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="text-cyan-400 font-mono font-bold text-base">01. ASCII Kodlama</div>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            Metindeki her bir karakter (harf, boşluk, noktalama) uluslararası standart olan 3 haneli sayısal kodlara (ASCII) dönüştürülür. Örn: 'A' = 065, 'T' = 084.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="text-purple-400 font-mono font-bold text-base">02. İrrasyonel Konumlandırma</div>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            Elde edilen 3 basamaklı sayılar, sonsuza kadar tekrar etmeyen ve örüntü barındırmayan Pi (&pi;) veya Euler (e) sabitlerinin virgülden sonraki basamaklarında taranarak konum indeksleri bulunur.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800 space-y-3">
+                        <div class="text-emerald-400 font-mono font-bold text-base">03. Salt Güvenliği</div>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            Açık Pi/e Modu veriyi gizlemez; HMAC-SHA-256 yanlış anahtarı veya değiştirilmiş paketi tespit eder. Gizli Token Modu ise AES-256-GCM ile veriyi gerçekten şifreler.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 glass-panel py-6 mt-12 text-center text-xs text-slate-500 font-mono">
+        <p>TÜBİTAK 2204-B Ortaokul Öğrencileri Araştırma Projeleri Yarışması &bull; Pi & e İrrasyonel Kriptografi Laboratuvarı</p>
+    </footer>
+
+    <script>
+'use strict';
+const PI_DIGITS="14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
+const E_DIGITS="71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516642742746639193200305992181741359662904357290033429526059563073813232862794349076323382988075319525101901";
+let currentOutputMode='open';
+const te=new TextEncoder(),td=new TextDecoder();
+function switchTab(id){['encrypt','decrypt','visualizer','about'].forEach(x=>{document.getElementById('sec-'+x)?.classList.add('hidden');let b=document.getElementById('tab-'+x);if(b)b.className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium text-slate-400 hover:text-white transition-all duration-200"});document.getElementById('sec-'+id)?.classList.remove('hidden');let b=document.getElementById('tab-'+id);if(b)b.className="px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 bg-cyan-500 text-slate-950 font-semibold shadow-md";if(id==='visualizer')renderVisualizer()}
+function setOutputMode(mode){currentOutputMode=mode;let a=document.getElementById('btn-mode-open'),b=document.getElementById('btn-mode-masked');if(mode==='open'){a.className="py-2.5 px-4 rounded-xl border border-cyan-500 bg-cyan-500/10 text-cyan-400 font-mono text-xs font-semibold transition flex items-center justify-center gap-2";b.className="py-2.5 px-4 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 font-mono text-xs font-semibold transition flex items-center justify-center gap-2 hover:border-slate-700"}else{b.className="py-2.5 px-4 rounded-xl border border-purple-500 bg-purple-500/10 text-purple-400 font-mono text-xs font-semibold transition flex items-center justify-center gap-2";a.className="py-2.5 px-4 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 font-mono text-xs font-semibold transition flex items-center justify-center gap-2 hover:border-slate-700"}}
+function generateRandomSalt(){let a=new Uint32Array(1);crypto.getRandomValues(a);document.getElementById('enc-salt').value=100+a[0]%9500}
+function sanitizeInput(s){return s.replace(/İ/g,"I").replace(/ı/g,"i").replace(/Ğ/g,"G").replace(/ğ/g,"g").replace(/Ü/g,"U").replace(/ü/g,"u").replace(/Ş/g,"S").replace(/ş/g,"s").replace(/Ö/g,"O").replace(/ö/g,"o").replace(/Ç/g,"C").replace(/ç/g,"c")}
+function getDigitIndexForCode(d,n){return d.indexOf(n.toString().padStart(3,'0'))}
+function b64(a){let s='';a.forEach(x=>s+=String.fromCharCode(x));return btoa(s)}
+function un64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+function rnd(n){let a=new Uint8Array(n);crypto.getRandomValues(a);return a}
+async function derive(password,salt,algorithm,usages){if(!window.isSecureContext||!crypto?.subtle)throw Error('Güvenli bağlantı gerekli. Siteyi HTTPS üzerinden aç.');let m=await crypto.subtle.importKey('raw',te.encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},m,algorithm,false,usages)}
+async function aesKey(p,s){return derive(p,s,{name:'AES-GCM',length:256},['encrypt','decrypt'])}
+async function macKey(p,s){return derive(p,s,{name:'HMAC',hash:'SHA-256',length:256},['sign','verify'])}
+async function makeMac(core,p,s){let k=await macKey(p,s),sig=await crypto.subtle.sign('HMAC',k,te.encode(JSON.stringify(core)));return b64(new Uint8Array(sig))}
+async function checkMac(core,p,s,mac){let k=await macKey(p,s);return crypto.subtle.verify('HMAC',k,un64(mac),te.encode(JSON.stringify(core)))}
+async function encryptMasked(payload,password){let salt=rnd(16),iv=rnd(12),key=await aesKey(password,salt),ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,te.encode(JSON.stringify(payload)));return 'PIENCRYPT$'+JSON.stringify({version:2,algorithm:'AES-256-GCM',kdf:'PBKDF2-SHA256',iterations:250000,kdfSalt:b64(salt),iv:b64(iv),data:b64(new Uint8Array(ct))})}
+async function decryptMasked(token,password){let w=JSON.parse(token.slice(10));if(w.version!==2||w.algorithm!=='AES-256-GCM')throw Error('Eski token. Yeni sürümle yeniden şifrele.');let key=await aesKey(password,un64(w.kdfSalt)),p=await crypto.subtle.decrypt({name:'AES-GCM',iv:un64(w.iv)},key,un64(w.data));return JSON.parse(td.decode(p))}
+async function executeEncrypt(){
+ let raw=document.getElementById('enc-input').value,mode=document.getElementById('enc-constant').value,saltText=document.getElementById('enc-salt').value.trim();
+ if(!raw.trim()){alert('Lütfen şifrelenecek bir mesaj girin!');return}if(!/^\d{1,9}$/.test(saltText)){alert('0-999999999 arasında bir anahtar girin.');return}
+ let salt=Number(saltText),input=sanitizeInput(raw),digits=mode==='e'?E_DIGITS:PI_DIGITS,items=[];
+ for(let i=0;i<input.length;i++){let code=input.charCodeAt(i),idx=getDigitIndexForCode(digits,code);items.push({idx:idx<0?-1:idx+salt,ascii:code,found:idx>=0})}
+ let payload={c:mode.toUpperCase(),s:salt,d:items,version:2},out='',button=document.querySelector("button[onclick='executeEncrypt()']");
+ try{
+  if(button){button.disabled=true;button.style.opacity='.6'}
+  if(currentOutputMode==='open'){
+   let core={version:2,c:payload.c,indeksler:items.map(x=>x.idx),bulunanlar:items.map(x=>x.found),veri:b64(te.encode(input))},ks=rnd(16),mac=await makeMac(core,saltText,ks);
+   out='PIOPEN-'+payload.c+':'+JSON.stringify({...core,kdfSalt:b64(ks),mac});
+  }else out=await encryptMasked(payload,saltText);
+  document.getElementById('enc-placeholder').classList.add('hidden');let el=document.getElementById('enc-output-text');el.innerText=out;el.classList.remove('hidden');
+  document.getElementById('stat-chars').innerText=Array.from(input).length;document.getElementById('stat-const').innerText=payload.c;document.getElementById('stat-status').innerText=currentOutputMode==='open'?'Kontrol eklendi':'AES-256-GCM kilitlendi';
+ }catch(e){alert('Şifreleme hatası: '+e.message)}finally{if(button){button.disabled=false;button.style.opacity='1'}}
+}
+async function executeDecrypt(){
+ let input=document.getElementById('dec-input').value.trim(),saltText=document.getElementById('dec-salt').value.trim(),button=document.querySelector("button[onclick='executeDecrypt()']");
+ if(!/^\d{1,9}$/.test(saltText)){showDecryptError('❌ YANLIŞ GİZLİ ANAHTAR!');return}if(!input){showDecryptError('Lütfen şifreli veriyi girin!');return}
+ try{
+  if(button){button.disabled=true;button.style.opacity='.6'}let payload,constTag='PI',salt=Number(saltText);
+  if(input.startsWith('PIENCRYPT$')){payload=await decryptMasked(input,saltText);if(payload.s!==salt)throw Error('Anahtar yanlış');constTag=payload.c||'PI'}
+  else if(input.startsWith('PIOPEN-')){
+   let n=input.indexOf(':');if(n<0)throw Error('Token biçimi hatalı');constTag=input.slice(7,n);let t=JSON.parse(input.slice(n+1));
+   if(t.version!==2||!t.mac||!t.kdfSalt)throw Error('Eski token doğrulama içermiyor. Yeniden şifrele.');
+   let core={version:t.version,c:t.c,indeksler:t.indeksler,bulunanlar:t.bulunanlar,veri:t.veri};
+   if(!await checkMac(core,saltText,un64(t.kdfSalt),t.mac))throw Error('Anahtar yanlış veya veri değiştirilmiş');
+   let decoded=td.decode(un64(t.veri)),chars=Array.from(decoded);if(chars.length!==t.indeksler.length)throw Error('Token tutarsız');
+   payload={c:t.c,salt,d:chars.map((ch,i)=>({idx:t.indeksler[i],ascii:ch.charCodeAt(0),found:t.bulunanlar[i]}))};
+  }else throw Error('Token biçimi tanınmadı. Yeni sürümle oluşturulmuş token kullan.');
+  if(!payload||!Array.isArray(payload.d))throw Error('Token verisi geçersiz');
+  let chars=[],rows='';payload.d.forEach(item=>{let real=item.idx===-1?-1:item.idx-salt,ch=String.fromCharCode(item.ascii),safe=ch===' '?'[Boşluk]':ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');chars.push(ch);rows+=`<tr class="hover:bg-slate-900/50"><td class="p-2 text-emerald-400 font-bold">${safe}</td><td class="p-2 text-cyan-400">${constTag}</td><td class="p-2">${real}</td><td class="p-2 text-purple-400">${item.ascii.toString().padStart(3,'0')}</td><td class="p-2 text-slate-400">${item.found===false||real===-1?'Seçilen basamaklarda bulunamadı':'Konum kaydı'}</td></tr>`});
+  document.getElementById('dec-placeholder').classList.add('hidden');let result=document.getElementById('dec-result-text');result.innerText=chars.join('');result.classList.remove('hidden');document.getElementById('dec-table-body').innerHTML=rows||'<tr><td colspan="5" class="p-4 text-center">Boş mesaj</td></tr>';
+  let badge=document.getElementById('dec-status-badge');badge.innerText='Başarılı';badge.className='text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+ }catch(e){showDecryptError(e.name==='OperationError'?'❌ YANLIŞ GİZLİ ANAHTAR!':'❌ YANLIŞ ANAHTAR / GEÇERSİZ TOKEN!')}finally{if(button){button.disabled=false;button.style.opacity='1'}}
+}
+function showDecryptError(msg){let p=document.getElementById('dec-placeholder');p.innerText=msg+'\n❓❓❓❓❓';p.classList.remove('hidden');let r=document.getElementById('dec-result-text');r.innerText='';r.classList.add('hidden');document.getElementById('dec-table-body').innerHTML=`<tr><td colspan="5" class="p-4 text-center text-rose-400">${msg} (Hiçbir karakter çözülmedi)</td></tr>`;let b=document.getElementById('dec-status-badge');b.innerText='Hata';b.className='text-xs font-mono px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30'}
+function copyEncryptedOutput(){let t=document.getElementById('enc-output-text').innerText;if(!t)return;navigator.clipboard.writeText(t).then(()=>{let b=document.querySelector("button[onclick='copyEncryptedOutput()']"),old=b.innerHTML;b.innerHTML="<span class='text-emerald-400'>✓ Kopyalandı</span>";setTimeout(()=>b.innerHTML=old,1500)}).catch(()=>alert('Kopyalama engellendi. Elle seçip kopyala.'))}
+function renderVisualizer(){let choice=document.getElementById('vis-constant').value,d=choice==='e'?E_DIGITS:PI_DIGITS,c=document.getElementById('vis-grid');let h=`<div class="mb-4 text-xs text-slate-400 font-mono">Yerel örnek veri: ${d.length} basamak</div><div class="flex flex-wrap gap-1.5">`;for(let i=0;i<d.length;i++)h+=`<span id="digit-${i}" class="digit-box inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-cyan-400 font-semibold" title="Basamak #${i+1}">${d[i]}</span>`;c.innerHTML=h+'</div>';highlightVisualizerDigits()}
+function highlightVisualizerDigits(){let q=document.getElementById('vis-search').value.trim(),d=document.getElementById('vis-constant').value==='e'?E_DIGITS:PI_DIGITS;for(let i=0;i<d.length;i++){let el=document.getElementById('digit-'+i);if(el)el.className="digit-box inline-flex items-center justify-center w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono text-cyan-400 font-semibold"}if(!q)return;let ix=d.indexOf(q);if(ix>=0)for(let k=0;k<q.length;k++){let el=document.getElementById('digit-'+(ix+k));if(el)el.className="digit-box inline-flex items-center justify-center w-7 h-7 rounded-lg bg-cyan-500 text-slate-950 text-xs font-mono font-bold shadow-lg glow-cyan transform scale-110"}}
+</script>
+</body>
+</html>
